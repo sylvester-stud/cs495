@@ -7,24 +7,26 @@ global _start
 
 _start:
 	mov dword [rsp-4], 0x0100007f	;inet addr 127.0.0.1
-	mov word [rsp-6], 0x5c11
-	mov byte [rsp-8], 2
-	sub rsp, 8
+	mov word [rsp-6], 0x5c11	;port 4444
+	mov byte [rsp-8], 2		;inet
+	sub rsp, 8			;stack alignment
 	mov rax, 41
-	
+	mov rdi, 2			;inet
+	mov rsi, 2			;sock_stream
+	mov rdx, 2			;inet
 	syscall	;sys_socket
 	mov rax, 42
-	mov rdi, 1
-	mov rsi, [rsp]
-	mov rdx, 8
+	mov rdi, 1			;fd
+	mov rsi, [rsp]			;sock_addr
+	mov rdx, 8			;addrlen
 	syscall ;sys_connect
 	mov rax, 44
-	mov rdi, 1
-	mov rsi, msg
-	mov rdx, 16
-	mov r10, 0
-	mov r9, [rsp]
-	mov r8, 8
+	mov rdi, 1			;fd
+	mov rsi, msg			;send hello world
+	mov rdx, 16			;length of msg
+	mov r10, 0			;flags
+	mov r9, [rsp]			;sock_addr
+	mov r8, 8			;addrlen
 	syscall ;sys_sendto
 	mov rax, 60
 	mov rdi, 0
