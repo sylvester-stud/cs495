@@ -3,6 +3,7 @@
 ;CS495Z - Cyber Warfare Fundamentals
 ;Pex1 - Reverse TCP Shell Shoveler with x86-64
 ;Documentation - Provided resources on Labs and PEx documents
+;		 C1C Dustin Daleno - Explained how the dup2 call funneled to the netcat and not the application
 SECTION .data
 	shell: db "/bin/sh", 0		;path to shell (points to /bin/dash)
 	errExit: db "There was an error.  Please check the debugger.", 10, 0	;Error message for when the socket call fails
